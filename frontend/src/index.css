@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+.leaflet-container {
+  height: 80%;
+  width: 80%;
+  margin: 0 auto;
+  touch-action: pan-x pan-y; /* ✅ enables drag on touch devices */
+}
