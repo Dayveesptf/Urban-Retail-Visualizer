@@ -248,32 +248,36 @@ setStatus("Fetching stores from Overpass...");
     mapRef.current.fitBounds(bounds.pad(0.2));
 
     // 4) send summary to backend AI endpoint
-    try {
-      setStatus("Requesting AI analysis...");
-      const resp = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          location: { address, center, radiusMeters: radius },
-          clusters: clustersSummary.map((c) => ({
-            id: c.id,
-            centroid: c.centroid,
-            storeCount: c.storeCount,
-            types: c.types,
-            sizes: c.sizes,
-          })),
-        }),
-      });
-      if (resp.ok) {
-        const body = await resp.json();
-        setAiInsight(body.insight);
-        setStatus("Done");
-      } else {
-        setStatus("AI request failed");
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus("AI request error");
+    const BACKEND_URL = "https://urban-retail-visualizer-3jae.vercel.app";
+try {
+  setStatus("Requesting AI analysis...");
+  const resp = await fetch(`${BACKEND_URL}/api/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      location: { address, center, radiusMeters: radius },
+      clusters: clustersSummary.map((c) => ({
+        id: c.id,
+        centroid: c.centroid,
+        storeCount: c.storeCount,
+        types: c.types,
+        sizes: c.sizes,
+      })),
+    }),
+  });
+
+  if (resp.ok) {
+    const body = await resp.json();
+    setAiInsight(body.insight);
+    setStatus("Done");
+  } else {
+    const text = await resp.text();
+    console.error("AI request failed:", text);
+    setStatus("AI request failed");
+  }
+} catch (err) {
+  console.error("AI request error:", err);
+  setStatus("AI request error");
 }
 console.log("Sending clusters to AI:", clustersSummary);
 
